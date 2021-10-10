@@ -1,0 +1,132 @@
+<html>
+<body onload="body_Loaded()">
+
+<div id="divUi" onload="divUi_Loaded()">
+
+	<h3>Scheduled Event Notifier</h3>
+
+	<p>
+		This program allows the user to schedule events,
+		and will attempt to alert the user just before
+		an event is scheduled.
+	</p>
+
+	<div>
+		<label>Current Local Time:</label><br />
+		<input id="inputTimeCurrent" type="datetime-local" readonly="true" />
+	</div>
+
+	<div>
+		<label>Search for Scheduled Events:</label><br />
+		<label>From:</label>
+		<input id="inputTimeStart" type="datetime-local" />
+		<label>To:</label>
+		<input id="inputTimeEnd" type="datetime-local" />
+		<button onclick="buttonSearch_Clicked()">Search</button>
+	</div>
+
+	<div>
+		<label>Timeslots in Specified Range:</label><br />
+		<select
+			id="selectTimeslotsInSpecifiedTimeRange"
+			size="16"
+			style="width:100%"
+			onchange="selectTimeslotsInSpecifiedTimeRange_Changed(this)"
+		>
+		</select>
+	</div>
+
+	<div>
+		<label>Timeslot Selected:</label><br />
+		<label>Starts:</label><br />
+		<input id="inputTimeslotSelectedTimeStart" type="datetime-local" readonly="true" /><br />
+		<label>Events in Timeslot:</label>
+		<button onclick="buttonEventAdd_Clicked()">Add</button>
+		<br />
+		<select
+			id="selectTimeslotEvents"
+			size="4"
+			style="width:100%"
+			onchange="selectTimeslotEvents_Changed(this)"
+		>
+		</select>
+	</div>
+
+	<div>
+		<label>Event Selected:</label>
+		<input id="inputEvent"></input>
+		<button onclick="buttonEventDelete_Clicked()">Delete</button>
+	</div>
+
+</div>
+
+<script type="text/javascript" src="IdHelper.js"></script>
+<script type="text/javascript" src="Scheduler.js"></script>
+<script type="text/javascript" src="SchedulerEvent.js"></script>
+<script type="text/javascript" src="Timeslot.js"></script>
+
+<script type="text/javascript">
+
+// UI event handlers.
+
+function body_Loaded()
+{
+	Scheduler.Instance().startMonitoring();
+	Scheduler.Instance().search();
+}
+
+function buttonEventAdd_Clicked()
+{
+	var scheduler = Scheduler.Instance();
+	var timeslot = scheduler.timeslotSelected();
+	if (timeslot != null)
+	{
+		var timeslotTimeEnd = timeslot.timeEnd();
+		var event = new SchedulerEvent
+		(
+			"[new event]", timeslot.timeStart, timeslotTimeEnd
+		);
+		scheduler.eventAdd(event);
+		scheduler.search();
+	}
+}
+
+function buttonEventDelete_Clicked()
+{
+	alert("todo");
+}
+
+function buttonSearch_Clicked()
+{
+	Scheduler.Instance().search();
+}
+
+function selectTimeslotEvents_Changed(selectTimeslotEvents)
+{
+	var eventId = selectTimeslotEvents.value;
+	var event = Scheduler.Instance().eventById(eventId);
+	var d = document;
+	var inputEventName = d.getElementById("inputEventName");
+	inputEventName.value = event.name;
+}
+
+function selectTimeslotsInSpecifiedTimeRange_Changed(selectTimeslots)
+{
+	var timeslotSelected = Scheduler.Instance().timeslotSelected();
+	var d = document;
+	var inputTimeslotSelectedTimeStart =
+		d.getElementById("inputTimeslotSelectedTimeStart");
+	inputTimeslotSelectedTimeStart.value =
+		new Date
+		(
+			timeslotSelected.timeStart
+			- Scheduler.Instance().timezoneOffsetInMilliseconds
+		).toISOString().slice(0, -1);
+}
+
+// Classes.
+
+</script>
+
+</body>
+</html>
